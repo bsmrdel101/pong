@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, world!");
+  engine::run().expect("Failed to run engine!");
 }

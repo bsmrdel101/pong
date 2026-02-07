@@ -1,0 +1,18 @@
+[tasks.build]
+workspace = false
+command = "cargo"
+args = ["build", "--release", "-p", "game"]
+
+[tasks.build-web]
+workspace = false
+command = "wasm-pack"
+args = ["build", "engine", "--target", "web", "--release"]
+
+[tasks.run]
+workspace = false
+command = "cargo"
+args = ["run", "-p", "game"]
+
+[tasks.run-prod]
+workspace = false
+command = "./target/release/game"
