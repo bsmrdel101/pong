@@ -1,16 +1,44 @@
 use std::sync::Arc;
-use wgpu;
+use std::mem;
 use anyhow;
+use wgpu;
+use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalPosition;
 
-// #[cfg(target_arch = "wasm32")]
-// use winit::event_loop;
+#[cfg(target_arch = "wasm32")]
+use winit::event_loop;
 use winit::{
   application::ApplicationHandler, event::*, event_loop::{ActiveEventLoop, EventLoop}, keyboard::{KeyCode, PhysicalKey}, window::Window
 };
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
+
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+struct Vertex {
+  position: [f32; 3],
+  color: [f32; 3]
+}
+
+const VERTICES: &[Vertex] = &[
+  Vertex { position: [0.0, 0.5, 0.0], color: [1.0, 0.0, 0.0] },
+  Vertex { position: [-0.5, -0.5, 0.0], color: [0.0, 1.0, 0.0] },
+  Vertex { position: [0.5, -0.5, 0.0], color: [0.0, 0.0, 1.0] }
+];
+
+impl Vertex {
+  const ATTRIBUTES: [wgpu::VertexAttribute; 2] = wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3];
+
+  fn desc() -> wgpu::VertexBufferLayout<'static> {
+    wgpu::VertexBufferLayout {
+      array_stride: mem::size_of::<Self>() as wgpu::BufferAddress,
+      step_mode: wgpu::VertexStepMode::Vertex,
+      attributes: &Self::ATTRIBUTES
+    }
+  }
+}
 
 
 pub struct State {
@@ -24,6 +52,8 @@ pub struct State {
   msaa_view: wgpu::TextureView,
   msaa_texture: Option<wgpu::Texture>,
   msaa_samples: u32,
+  vertex_buffer: wgpu::Buffer,
+  num_vertices: u32,
   window: Arc<Window>
 }
 
@@ -77,7 +107,7 @@ impl State {
       desired_maximum_frame_latency: 2
     };
 
-    let msaa_samples = 1;
+    let msaa_samples = 4;
     let msaa_texture = device.create_texture(&wgpu::TextureDescriptor {
       label: Some("MSAA Texture"),
       size: wgpu::Extent3d {
@@ -112,7 +142,7 @@ impl State {
       vertex: wgpu::VertexState {
         module: &shader,
         entry_point: Some("vs_main"),
-        buffers: &[],
+        buffers: &[Vertex::desc()],
         compilation_options: wgpu::PipelineCompilationOptions::default()
       },
       fragment: Some(wgpu::FragmentState {
@@ -144,6 +174,14 @@ impl State {
       cache: None
     });
 
+    let vertex_buffer = device.create_buffer_init(
+      &wgpu::util::BufferInitDescriptor {
+        label: Some("Vertex Buffer"),
+        contents: bytemuck::cast_slice(VERTICES),
+        usage: wgpu::BufferUsages::VERTEX
+      }
+    );
+    let num_vertices = VERTICES.len() as u32;
 
     Ok(Self {
       surface,
@@ -156,6 +194,8 @@ impl State {
       msaa_view,
       msaa_texture: Some(msaa_texture),
       msaa_samples,
+      vertex_buffer,
+      num_vertices,
       window
     })
   }
@@ -253,7 +293,8 @@ impl State {
       });
 
       render_pass.set_pipeline(&self.render_pipeline);
-      render_pass.draw(0..3, 0..1);
+      render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+      render_pass.draw(0..self.num_vertices, 0..1);
     }
 
     self.queue.submit(std::iter::once(encoder.finish()));
