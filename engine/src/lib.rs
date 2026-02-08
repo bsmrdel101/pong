@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use wgpu;
 use anyhow;
+use winit::dpi::PhysicalPosition;
 
 // #[cfg(target_arch = "wasm32")]
 // use winit::event_loop;
@@ -18,6 +19,7 @@ pub struct State {
   queue: wgpu::Queue,
   config: wgpu::SurfaceConfiguration,
   is_surface_configured: bool,
+  mouse_position: PhysicalPosition<f64>,
   window: Arc<Window>
 }
 
@@ -77,6 +79,7 @@ impl State {
       queue,
       config,
       is_surface_configured: false,
+      mouse_position: PhysicalPosition::new(0.0, 0.0),
       window
     })
   }
@@ -88,6 +91,10 @@ impl State {
       self.surface.configure(&self.device, &self.config);
       self.is_surface_configured = true;
     }
+  }
+
+  fn handle_mouse_moved(&mut self, position: PhysicalPosition<f64>) {
+    self.mouse_position = position;
   }
 
   fn handle_key(&self, event_loop: &ActiveEventLoop, code: KeyCode, is_pressed: bool) {
@@ -256,6 +263,9 @@ impl ApplicationHandler<State> for App {
           },
         ..
       } => state.handle_key(event_loop, code, key_state.is_pressed()),
+      WindowEvent::CursorMoved { position, .. } => {
+        state.handle_mouse_moved(position);
+      },
       _ => {}
     }
   }
