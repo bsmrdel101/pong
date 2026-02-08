@@ -21,6 +21,9 @@ pub struct State {
   is_surface_configured: bool,
   mouse_position: PhysicalPosition<f64>,
   render_pipeline: wgpu::RenderPipeline,
+  msaa_view: wgpu::TextureView,
+  msaa_texture: Option<wgpu::Texture>,
+  msaa_samples: u32,
   window: Arc<Window>
 }
 
@@ -74,6 +77,24 @@ impl State {
       desired_maximum_frame_latency: 2
     };
 
+    let msaa_samples = 1;
+    let msaa_texture = device.create_texture(&wgpu::TextureDescriptor {
+      label: Some("MSAA Texture"),
+      size: wgpu::Extent3d {
+        width: config.width,
+        height: config.height,
+        depth_or_array_layers: 1,
+      },
+      mip_level_count: 1,
+      sample_count: msaa_samples,
+      dimension: wgpu::TextureDimension::D2,
+      format: config.format,
+      usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+      view_formats: &[],
+    });
+
+    let msaa_view = msaa_texture.create_view(&wgpu::TextureViewDescriptor::default());
+
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
       label: Some("Shader"),
       source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into())
@@ -115,7 +136,7 @@ impl State {
       },
       depth_stencil: None,
       multisample: wgpu::MultisampleState {
-        count: 1,
+        count: msaa_samples,
         mask: !0,
         alpha_to_coverage_enabled: false
       },
@@ -132,7 +153,33 @@ impl State {
       is_surface_configured: false,
       mouse_position: PhysicalPosition::new(0.0, 0.0),
       render_pipeline,
+      msaa_view,
+      msaa_texture: Some(msaa_texture),
+      msaa_samples,
       window
+    })
+  }
+
+  fn create_multisampled_framebuffer(
+    device: &wgpu::Device,
+    width: u32,
+    height: u32,
+    sample_count: u32,
+    format: wgpu::TextureFormat
+  ) -> wgpu::Texture {
+    device.create_texture(&wgpu::TextureDescriptor {
+      label: Some("MSAA Texture"),
+      size: wgpu::Extent3d {
+        width,
+        height,
+        depth_or_array_layers: 1
+      },
+      mip_level_count: 1,
+      sample_count,
+      dimension: wgpu::TextureDimension::D2,
+      format,
+      usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+      view_formats: &[format]
     })
   }
 
@@ -142,6 +189,18 @@ impl State {
       self.config.height = height;
       self.surface.configure(&self.device, &self.config);
       self.is_surface_configured = true;
+    }
+
+    if self.msaa_samples > 1 {
+      let msaa_texture = Self::create_multisampled_framebuffer(
+        &self.device,
+        width,
+        height,
+        self.msaa_samples,
+        self.config.format
+      );
+      self.msaa_view = msaa_texture.create_view(&wgpu::TextureViewDescriptor::default());
+      self.msaa_texture = Some(msaa_texture);
     }
   }
 
@@ -162,7 +221,6 @@ impl State {
 
   pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
     self.window.request_redraw();
-
     if !self.is_surface_configured {
       return Ok(())
     }
@@ -175,26 +233,19 @@ impl State {
     });
 
     {
+      let color_attachment = wgpu::RenderPassColorAttachment {
+        view: if self.msaa_samples > 1 { &self.msaa_view } else { &view },
+        resolve_target: if self.msaa_samples > 1 { Some(&view) } else { None },
+        depth_slice: None,
+        ops: wgpu::Operations {
+          load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.1, g: 0.2, b: 0.7, a: 1.0 }),
+          store: wgpu::StoreOp::Store
+        }
+      };
+      
       let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         label: Some("Render Pass"),
-        color_attachments: &[
-          Some(wgpu::RenderPassColorAttachment {
-            view: &view,
-            depth_slice: None,
-            resolve_target: None,
-            ops: wgpu::Operations {
-              load: wgpu::LoadOp::Clear(
-                wgpu::Color {
-                  r: 0.1,
-                  g: 0.2,
-                  b: 0.7,
-                  a: 1.0
-                }
-              ),
-              store: wgpu::StoreOp::Store
-            }
-          })
-        ],
+        color_attachments: &[Some(color_attachment)],
         depth_stencil_attachment: None,
         occlusion_query_set: None,
         timestamp_writes: None,
