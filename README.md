@@ -9,8 +9,6 @@ Start by running the project with `cargo make run`
 - `cargo make run` -> Run debug
 - `cargo make run-prod` -> Run release
 
-<br />
-
 # Web Build
 
 ## Plain HTML
