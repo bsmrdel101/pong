@@ -6,23 +6,7 @@ use winit::{
   event::WindowEvent,
   window::WindowId
 };
-use crate::{ app::state::AppState, error::EngineResult, platform::window_attributes };
-
-pub struct App {
-  pub state: Option<AppState>,
-}
-
-impl App {
-  pub fn new() -> Self {
-    Self {
-      state: None,
-    }
-  }
-}
-
-pub async fn create_state(window: Arc<Window>) -> EngineResult<AppState> {
-  AppState::new(window).await
-}
+use crate::{ app::state::{App, AppState}, error::EngineResult, platform::window_attributes, rendering::renderer::Renderer };
 
 impl ApplicationHandler<()> for App {
   fn resumed(&mut self, event_loop: &ActiveEventLoop) {
@@ -58,6 +42,11 @@ impl ApplicationHandler<()> for App {
   }
 }
 
+
+pub async fn create_state(window: Arc<Window>) -> EngineResult<AppState> {
+  let renderer = Renderer::new(window.clone()).await?;
+  AppState::new(window, renderer).await
+}
 
 pub fn run() -> EngineResult<()> {
   let event_loop = EventLoop::new()?;

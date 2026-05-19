@@ -2,23 +2,26 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum EngineError {
-  #[error("WINIT ERROR (EventLoopError)")]
-  EventLoop(winit::error::EventLoopError),
+  #[error(transparent)]
+  EventLoop(#[from] winit::error::EventLoopError),
 
-  #[error("WGPU ERROR (RequestDeviceError)")]
-  Rendering(wgpu::RequestDeviceError),
+  #[error(transparent)]
+  RequestDeviceError(#[from] wgpu::RequestDeviceError),
+
+  #[error(transparent)]
+  SurfaceError(#[from] wgpu::SurfaceError),
+
+  #[error(transparent)]
+  RequestAdapterError(#[from] wgpu::RequestAdapterError),
+
+  #[error(transparent)]
+  CreateSurfaceError(#[from] wgpu::CreateSurfaceError),
+
+  #[error(transparent)]
+  IOError(#[from] std::io::Error),
+
+  #[error(transparent)]
+  ImageError(#[from] image::ImageError)
 }
 
 pub type EngineResult<T> = Result<T, EngineError>;
-
-impl From<winit::error::EventLoopError> for EngineError {
-  fn from(value: winit::error::EventLoopError) -> Self {
-    EngineError::EventLoop(value)
-  }
-}
-
-impl From<wgpu::RequestDeviceError> for EngineError {
-  fn from(value: wgpu::RequestDeviceError) -> Self {
-    EngineError::Rendering(value)
-  }
-}

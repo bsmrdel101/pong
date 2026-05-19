@@ -1,5 +1,6 @@
 use wasm_bindgen::JsCast;
 use winit::{ platform::web::WindowAttributesExtWebSys, window::WindowAttributes };
+use wgpu::{ Instance, Limits };
 
 
 pub fn window_attributes() -> WindowAttributes {
@@ -11,4 +12,15 @@ pub fn window_attributes() -> WindowAttributes {
   attrs = attrs.with_canvas(Some(canvas));
 
   attrs
+}
+
+pub fn get_instance() -> Instance {
+  Instance::new(&wgpu::InstanceDescriptor {
+    backends: wgpu::Backends::GL,
+    ..Default::default()
+  })
+}
+
+pub fn get_device_required_limits() -> Limits {
+  Limits::downlevel_webgl2_defaults()
 }

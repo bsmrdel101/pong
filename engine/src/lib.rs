@@ -1,7 +1,7 @@
 pub mod error;
 pub mod app;
 pub mod platform;
-// mod texture;
+pub mod rendering;
 
 // use std::sync::Arc;
 // use std::mem;
@@ -354,8 +354,8 @@ pub mod platform;
 
 //     {
 //       let color_attachment = wgpu::RenderPassColorAttachment {
-//         view: if self.msaa_samples > 1 { &self.msaa_view } else { &view },
-//         resolve_target: if self.msaa_samples > 1 { Some(&view) } else { None },
+        // view: if self.msaa_samples > 1 { &self.msaa_view } else { &view },
+        // resolve_target: if self.msaa_samples > 1 { Some(&view) } else { None },
 //         depth_slice: None,
 //         ops: wgpu::Operations {
 //           load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.1, g: 0.2, b: 0.7, a: 1.0 }),
