@@ -461,6 +461,7 @@ dependencies = [
  "image",
  "log",
  "pollster",
+ "thiserror 2.0.18",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

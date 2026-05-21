@@ -51,7 +51,7 @@ impl Renderer {
       format: surface_format,
       width: size.width,
       height: size.height,
-      present_mode: surface_caps.present_modes[0],
+      present_mode: wgpu::PresentMode::Fifo,
       alpha_mode: surface_caps.alpha_modes[0],
       view_formats: vec![],
       desired_maximum_frame_latency: 2
@@ -168,5 +168,20 @@ impl Renderer {
     output.present();
 
     Ok(())
-  } 
+  }
+
+  pub fn resize(&mut self, width: u32, height: u32) {
+    if width == 0 || height == 0 { return; }
+
+    self.config.width = width;
+    self.config.height = height;
+
+    self.surface.configure(&self.device, &self.config);
+
+    self.msaa = MsaaTarget::new(
+      &self.device,
+      &self.config,
+      self.msaa.samples
+    );
+  }
 }

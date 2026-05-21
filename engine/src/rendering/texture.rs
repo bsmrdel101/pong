@@ -43,8 +43,6 @@ impl Texture {
     );
 
     let bytes_per_row_unpadded = 4 * dimensions.0;
-    let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
-    let padded_bytes_per_row = ((bytes_per_row_unpadded + align - 1) / align) * align;
 
     queue.write_texture(
       wgpu::TexelCopyTextureInfo {
@@ -56,7 +54,7 @@ impl Texture {
       &rgba,
       wgpu::TexelCopyBufferLayout {
         offset: 0,
-        bytes_per_row: Some(padded_bytes_per_row),
+        bytes_per_row: Some(bytes_per_row_unpadded),
         rows_per_image: Some(dimensions.1)
       },
       size

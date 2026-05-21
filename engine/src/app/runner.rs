@@ -20,7 +20,7 @@ impl ApplicationHandler<()> for App {
       }
     };
     
-    let state = match pollster::block_on(create_state(window)) {
+    let state = match pollster::block_on(create_state(&window)) {
       Ok(state) => state,
       Err(error) => {
         eprintln!("{error}");
@@ -29,23 +29,43 @@ impl ApplicationHandler<()> for App {
       }
     };
 
+    window.request_redraw();
+
     self.state = Some(state);
   }
 
   fn window_event(&mut self, event_loop: &ActiveEventLoop, _window_id: WindowId, event: WindowEvent) {
+    let state = match &mut self.state {
+      Some(state) => state,
+      None => return
+    };
+
     match event {
       WindowEvent::CloseRequested => {
         event_loop.exit();
       }
+
+      WindowEvent::RedrawRequested => {
+        if let Err(error) = state.renderer.render() {
+          eprintln!("{error}");
+        }
+
+        state.window.request_redraw();
+      }
+
+      WindowEvent::Resized(size) => {
+        state.renderer.resize(size.width, size.height);
+      }
+
       _ => {}
     }
   }
 }
 
 
-pub async fn create_state(window: Arc<Window>) -> EngineResult<AppState> {
+pub async fn create_state(window: &Arc<Window>) -> EngineResult<AppState> {
   let renderer = Renderer::new(window.clone()).await?;
-  AppState::new(window, renderer).await
+  AppState::new(window.clone(), renderer).await
 }
 
 pub fn run() -> EngineResult<()> {

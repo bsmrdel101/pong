@@ -1,5 +1,6 @@
 [workspace]
 members = ["engine", "game"]
+resolver = "3"
 
 [profile.release]
 strip = true
