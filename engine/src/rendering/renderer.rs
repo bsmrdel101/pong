@@ -95,7 +95,7 @@ impl Renderer {
     let texture = Texture::new(
       &device,
       &queue,
-      "assets/tree.png",
+      concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png"),
       &texture_bind_group_layout
     )?;
     let mesh = QuadMesh::new(&device);
