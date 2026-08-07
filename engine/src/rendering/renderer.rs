@@ -90,7 +90,7 @@ impl Renderer {
       }
     );
 
-    const MSAA_SAMPLES: u32 = 4;
+    const MSAA_SAMPLES: u32 = 1;
     let pipeline = RenderPipeline::new(&device, &config, MSAA_SAMPLES, &texture_bind_group_layout, &shader);
     let msaa = MsaaTarget::new(&device, &config, MSAA_SAMPLES);
 
