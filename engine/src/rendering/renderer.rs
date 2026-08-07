@@ -2,9 +2,10 @@ use std::sync::Arc;
 use winit::window::Window;
 use crate::{
   error::EngineResult,
-  platform::desktop::{ get_device_required_limits, get_instance },
-  rendering::{ mesh::QuadMesh, pipeline::{ MsaaTarget, RenderPipeline }, texture::Texture }
+  platform::desktop::{get_device_required_limits, get_instance},
+  rendering::{mesh::QuadMesh, pipeline::{MsaaTarget, RenderPipeline}, texture::Texture}
 };
+
 
 pub struct Renderer {
   surface: wgpu::Surface<'static>,
@@ -21,7 +22,7 @@ impl Renderer {
   pub async fn new(window: Arc<Window>) -> EngineResult<Self> {
     let size = window.inner_size();
     let instance = get_instance();
-    let surface = instance.create_surface(window.clone()).unwrap();
+    let surface = instance.create_surface(window).unwrap();
     
     let adapter = instance
       .request_adapter(&wgpu::RequestAdapterOptions {
@@ -58,6 +59,7 @@ impl Renderer {
     };
 
     surface.configure(&device, &config);
+
 
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
       label: Some("Shader"),
@@ -175,7 +177,6 @@ impl Renderer {
 
     self.config.width = width;
     self.config.height = height;
-
     self.surface.configure(&self.device, &self.config);
 
     self.msaa = MsaaTarget::new(

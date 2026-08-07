@@ -1,3 +1,3 @@
 fn main() {
-  engine::app::runner::run().expect("Failed to run engine!");
+  engine::run().expect("Failed to run engine!");
 }

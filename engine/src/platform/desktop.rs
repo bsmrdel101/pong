@@ -1,4 +1,4 @@
-use wgpu::{ Instance, Limits };
+use wgpu::{Instance, Limits};
 use winit::window::WindowAttributes;
 
 

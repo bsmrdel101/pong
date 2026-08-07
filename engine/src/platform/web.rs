@@ -1,6 +1,6 @@
 use wasm_bindgen::JsCast;
-use winit::{ platform::web::WindowAttributesExtWebSys, window::WindowAttributes };
-use wgpu::{ Instance, Limits };
+use winit::{platform::web::WindowAttributesExtWebSys, window::WindowAttributes};
+use wgpu::{Instance, Limits};
 
 
 pub fn window_attributes() -> WindowAttributes {

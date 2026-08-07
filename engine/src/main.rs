@@ -1,4 +1,4 @@
-use engine::{ app::runner::run, error::EngineResult };
+use engine::{error::EngineResult, run};
 
 
 fn main() -> EngineResult<()> {
