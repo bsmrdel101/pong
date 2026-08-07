@@ -1,18 +1,36 @@
-[tasks.build]
+[tasks.build-desktop]
 workspace = false
-command = "cargo"
-args = ["build", "--release", "-p", "game"]
+script_runner = "@shell"
+script = [
+  "cargo build --release -p game",
+  "mkdir -p ./builds/desktop",
+  "cp target/release/game.exe ./builds/desktop"
+]
 
 [tasks.build-web]
 workspace = false
-command = "wasm-pack"
-args = ["build", "engine", "--target", "web", "--release"]
+script_runner = "@shell"
+script = [
+  "rm -rf ./builds/web",
+  "mkdir -p ./builds/web/assets",
+  "wasm-pack build engine --target web --release --out-dir ../builds/web",
+  "cp ./engine/index.html ./builds/web/index.html",
+  "cp -r ./engine/assets ./builds/web/assets"
+]
 
-[tasks.run]
+[tasks.dev]
 workspace = false
-command = "cargo"
-args = ["run", "-p", "game"]
+script = [
+  "cargo run -p game"
+]
 
-[tasks.run-prod]
+[tasks.prod]
 workspace = false
-command = "./target/release/game"
+command = "./builds/desktop/game"
+
+[tasks.web]
+workspace = false
+script_runner = "@shell"
+script = [
+  "python3 -m http.server 8050 --directory ./builds/web"
+]

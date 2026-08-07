@@ -1,5 +1,9 @@
 # Getting Started
 
+Make sure you have [cargo-make](https://github.com/sagiegurari/cargo-make) and [wasm-pack](https://wasm-bindgen.github.io/wasm-pack/installer) installed.
+  - `cargo install --force cargo-make`
+  - `cargo install wasm-pack`
+
 Start by running the project with `cargo make run`
 
 ## Commands
@@ -49,6 +53,6 @@ Start by running the project with `cargo make run`
 ## Framework
 
 ```js
-const init = await import('./pkg/game.js');
+const init = await import('./pkg/engine.js');
 init().then(() => console.log("WASM Loaded"));
 ```

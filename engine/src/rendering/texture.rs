@@ -1,6 +1,6 @@
 use image::GenericImageView;
 use wgpu::Queue;
-use crate::error::EngineResult;
+use crate::{error::EngineResult, platform::load_bytes};
 
 pub struct Texture {
   pub texture: wgpu::Texture,
@@ -10,8 +10,8 @@ pub struct Texture {
 }
 
 impl Texture {
-  pub fn new(device: &wgpu::Device, queue: &Queue, path: &str, layout: &wgpu::BindGroupLayout) -> EngineResult<Self> {
-    let bytes = std::fs::read(path)?;
+  pub async fn new(device: &wgpu::Device, queue: &Queue, path: &str, layout: &wgpu::BindGroupLayout) -> EngineResult<Self> {
+    let bytes = load_bytes(path).await?;
     Self::from_bytes(device, &queue, &bytes, path, layout)
   }
 

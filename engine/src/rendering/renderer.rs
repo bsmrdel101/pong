@@ -2,8 +2,8 @@ use std::sync::Arc;
 use winit::window::Window;
 use crate::{
   error::EngineResult,
-  platform::desktop::{get_device_required_limits, get_instance},
-  rendering::{mesh::QuadMesh, pipeline::{MsaaTarget, RenderPipeline}, texture::Texture}
+  platform::{get_device_required_limits, get_instance},
+  rendering::{meshes::quad::QuadMesh, pipeline::{MsaaTarget, RenderPipeline}, texture::Texture}
 };
 
 
@@ -90,16 +90,17 @@ impl Renderer {
       }
     );
 
-    const MSAA_SAMPLES: u32 = 1;
+    const MSAA_SAMPLES: u32 = 4;
     let pipeline = RenderPipeline::new(&device, &config, MSAA_SAMPLES, &texture_bind_group_layout, &shader);
     let msaa = MsaaTarget::new(&device, &config, MSAA_SAMPLES);
 
+    //concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png")
     let texture = Texture::new(
       &device,
       &queue,
-      concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png"),
+      "assets/tree.png",
       &texture_bind_group_layout
-    )?;
+    ).await?;
     let mesh = QuadMesh::new(&device);
 
     Ok(Self {

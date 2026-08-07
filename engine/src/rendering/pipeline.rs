@@ -1,4 +1,4 @@
-use crate::rendering::mesh::Vertex;
+use crate::rendering::meshes::quad::Vertex;
 
 pub struct MsaaTarget {
   pub texture: wgpu::Texture,

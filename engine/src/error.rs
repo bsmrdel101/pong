@@ -21,7 +21,22 @@ pub enum EngineError {
   IOError(#[from] std::io::Error),
 
   #[error(transparent)]
-  ImageError(#[from] image::ImageError)
+  ImageError(#[from] image::ImageError),
+  
+  #[cfg(target_arch = "wasm32")]
+  #[error("Javascript error: {0}")]
+  Js(String)
 }
 
 pub type EngineResult<T> = Result<T, EngineError>;
+
+#[cfg(target_arch = "wasm32")]
+impl From<wasm_bindgen::JsValue> for EngineError {
+  fn from(value: wasm_bindgen::JsValue) -> Self {
+    EngineError::Js(
+      value
+        .as_string()
+        .unwrap_or_else(|| format!("{:?}", value))
+    )
+  }
+}
