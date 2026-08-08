@@ -4,7 +4,8 @@
 workspace = false
 dependencies = [
   "build-linux",
-  "build-windows"
+  "build-windows",
+  "build-mac"
 ]
 
 [tasks.build-linux]
@@ -25,6 +26,16 @@ script = [
   "cargo build --release -p game",
   "mkdir -p ./builds/windows",
   "cp target/release/game.exe ./builds/windows/game.exe"
+]
+
+[tasks.build-mac]
+workspace = false
+condition = { platforms = ["mac"] }
+script_runner = "@shell"
+script = [
+  "cargo build --release -p game",
+  "mkdir -p ./builds/mac",
+  "cp target/release/game ./builds/mac/game"
 ]
 
 [tasks.build-web]
@@ -50,7 +61,8 @@ script = [
 workspace = false
 dependencies = [
   "prod-linux",
-  "prod-windows"
+  "prod-windows",
+  "prod-mac"
 ]
 
 [tasks.prod-linux]
@@ -62,6 +74,11 @@ command = "./builds/linux/game"
 workspace = false
 condition = { platforms = ["windows"] }
 command = "./builds/windows/game.exe"
+
+[tasks.prod-mac]
+workspace = false
+condition = { platforms = ["mac"] }
+command = "./builds/mac/game"
 
 [tasks.web]
 workspace = false
