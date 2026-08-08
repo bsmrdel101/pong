@@ -39,10 +39,10 @@ pub struct QuadMesh {
 impl QuadMesh {
   pub fn new(device: &wgpu::Device) -> Self {
     let vertices = [
-      Vertex { position: [-0.5,  0.5, 0.0], tex_coords: [0.0, 0.0] },
-      Vertex { position: [ 0.5,  0.5, 0.0], tex_coords: [1.0, 0.0] },
-      Vertex { position: [ 0.5, -0.5, 0.0], tex_coords: [1.0, 1.0] },
-      Vertex { position: [-0.5, -0.5, 0.0], tex_coords: [0.0, 1.0] }
+      Vertex { position: [-0.5,  0.8, 0.0], tex_coords: [0.0, 0.0] },
+      Vertex { position: [ 0.5,  0.8, 0.0], tex_coords: [1.0, 0.0] },
+      Vertex { position: [ 0.5, -0.8, 0.0], tex_coords: [1.0, 1.0] },
+      Vertex { position: [-0.5, -0.8, 0.0], tex_coords: [0.0, 1.0] }
     ];
 
     let indices: &[u16] = &[

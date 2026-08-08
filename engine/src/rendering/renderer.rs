@@ -7,6 +7,8 @@ use crate::{
 };
 
 
+const DISPLAY_RATIO: f32 = 16.0 / 9.0;
+
 pub struct Renderer {
   surface: wgpu::Surface<'static>,
   device: wgpu::Device,
@@ -156,6 +158,31 @@ impl Renderer {
           timestamp_writes: None,
           multiview_mask: None
         }
+      );
+
+      let surface_width = self.config.width as f32;
+      let surface_height = self.config.height as f32;
+      let target_aspect = DISPLAY_RATIO;
+      let surface_aspect = surface_width / surface_height;
+
+      let (viewport_width, viewport_height, viewport_x, viewport_y) =
+        if surface_aspect > target_aspect {
+          let height = surface_height;
+          let width = height * target_aspect;
+          (width, height, (surface_width - width) / 2.0, 0.0)
+        } else {
+          let width = surface_width;
+          let height = width / target_aspect;
+          (width, height, 0.0, (surface_height - height) / 2.0)
+        };
+
+      render_pass.set_viewport(
+        viewport_x,
+        viewport_y,
+        viewport_width,
+        viewport_height,
+        0.0,
+        1.0
       );
 
       render_pass.set_pipeline(&self.pipeline.pipeline);
