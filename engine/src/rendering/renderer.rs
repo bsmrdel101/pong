@@ -94,7 +94,7 @@ impl Renderer {
     let pipeline = RenderPipeline::new(&device, &config, MSAA_SAMPLES, &texture_bind_group_layout, &shader);
     let msaa = MsaaTarget::new(&device, &config, MSAA_SAMPLES);
 
-    //concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png")
+    // concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png")
     let texture = Texture::new(
       &device,
       &queue,

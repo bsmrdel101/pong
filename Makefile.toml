@@ -1,10 +1,30 @@
-[tasks.build-desktop]
+# Builds
+
+[tasks.build]
 workspace = false
+dependencies = [
+  "build-linux",
+  "build-windows"
+]
+
+[tasks.build-linux]
+workspace = false
+condition = { platforms = ["linux"] }
 script_runner = "@shell"
 script = [
   "cargo build --release -p game",
-  "mkdir -p ./builds/desktop",
-  "cp target/release/game.exe ./builds/desktop"
+  "mkdir -p ./builds/linux",
+  "cp target/release/game ./builds/linux/game"
+]
+
+[tasks.build-windows]
+workspace = false
+condition = { platforms = ["windows"] }
+script_runner = "@shell"
+script = [
+  "cargo build --release -p game",
+  "mkdir -p ./builds/windows",
+  "cp target/release/game.exe ./builds/windows/game.exe"
 ]
 
 [tasks.build-web]
@@ -18,6 +38,8 @@ script = [
   "cp -r ./engine/assets ./builds/web/assets"
 ]
 
+# Execution
+
 [tasks.dev]
 workspace = false
 script = [
@@ -26,11 +48,25 @@ script = [
 
 [tasks.prod]
 workspace = false
-command = "./builds/desktop/game"
+dependencies = [
+  "prod-linux",
+  "prod-windows"
+]
+
+[tasks.prod-linux]
+workspace = false
+condition = { platforms = ["linux"] }
+command = "./builds/linux/game"
+
+[tasks.prod-windows]
+workspace = false
+condition = { platforms = ["windows"] }
+command = "./builds/windows/game.exe"
 
 [tasks.web]
 workspace = false
 script_runner = "@shell"
 script = [
+  "echo http://localhost:8050",
   "python3 -m http.server 8050 --directory ./builds/web"
 ]

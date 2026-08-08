@@ -5,7 +5,10 @@ use crate::{App, error::EngineResult};
 
 pub fn spawn_event_loop(event_loop: EventLoop<()>)  {
   event_loop.set_control_flow(ControlFlow::Poll);
-  event_loop.run_app(&mut App::default()).unwrap();
+
+  if let Err(error) = event_loop.run_app(&mut App::default()) {
+    eprintln!("Event loop error: {error}");
+  }
 }
 
 pub fn window_attributes() -> WindowAttributes {
@@ -24,5 +27,6 @@ pub fn get_device_required_limits() -> Limits {
 }
 
 pub async fn load_bytes(path: &str) -> EngineResult<Vec<u8>> {
+  let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(path);
   Ok(std::fs::read(path)?)
 }
