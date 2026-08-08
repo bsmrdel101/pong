@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use winit::window::Window;
+use winit::{dpi::PhysicalSize, window::Window};
 use crate::{
   error::EngineResult,
   platform::{get_device_required_limits, get_instance},
@@ -20,9 +20,13 @@ pub struct Renderer {
 
 impl Renderer {
   pub async fn new(window: Arc<Window>) -> EngineResult<Self> {
-    let size = window.inner_size();
+    let mut size = window.inner_size();
+    if size.width == 0 || size.height == 0 {
+      size = PhysicalSize::new(800, 600);
+    }
+
     let instance = get_instance();
-    let surface = instance.create_surface(window).unwrap();
+    let surface = instance.create_surface(window)?;
     
     let adapter = instance
       .request_adapter(&wgpu::RequestAdapterOptions {
@@ -94,7 +98,6 @@ impl Renderer {
     let pipeline = RenderPipeline::new(&device, &config, MSAA_SAMPLES, &texture_bind_group_layout, &shader);
     let msaa = MsaaTarget::new(&device, &config, MSAA_SAMPLES);
 
-    // concat!(env!("CARGO_MANIFEST_DIR"), "/assets/tree.png")
     let texture = Texture::new(
       &device,
       &queue,

@@ -35,7 +35,7 @@ script = [
   "mkdir -p ./builds/web/assets",
   "wasm-pack build engine --target web --release --out-dir ../builds/web",
   "cp ./engine/index.html ./builds/web/index.html",
-  "cp -r ./engine/assets ./builds/web/assets"
+  "cp -r ./engine/assets ./builds/web"
 ]
 
 # Execution

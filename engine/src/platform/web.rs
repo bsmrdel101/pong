@@ -11,13 +11,14 @@ pub fn spawn_event_loop(event_loop: EventLoop<()>)  {
 }
 
 pub fn window_attributes() -> WindowAttributes {
-  let mut attrs = WindowAttributes::default();
   let window = web_sys::window().unwrap();
   let document = window.document().unwrap();
   let canvas = document.get_element_by_id("canvas").unwrap();
   let canvas: web_sys::HtmlCanvasElement = canvas.unchecked_into();
   canvas.set_width(800);
   canvas.set_height(600);
+  canvas.style().set_property("width", "800px").unwrap();
+  canvas.style().set_property("height", "600px").unwrap();
 
   WindowAttributes::default()
     .with_canvas(Some(canvas))
@@ -25,7 +26,11 @@ pub fn window_attributes() -> WindowAttributes {
 }
 
 pub fn get_instance() -> Instance {
-  Instance::default()
+  web_sys::console::log_1(&"Creating WGPU WebGL instance".into());
+  Instance::new(&wgpu::InstanceDescriptor {
+    backends: wgpu::Backends::GL,
+    ..Default::default()
+  })
 }
 
 pub fn get_device_required_limits() -> Limits {
@@ -40,6 +45,12 @@ pub async fn load_bytes(path: &str) -> EngineResult<Vec<u8>> {
     window.fetch_with_str(path)
   ).await?
   .dyn_into::<web_sys::Response>()?;
+
+  if !response.ok() {
+    return Err(EngineError::Js(
+      format!("Failed to load asset '{}': HTTP {}", path, response.status()).into()
+    ));
+  }
 
   let buffer = JsFuture::from(response.array_buffer()?).await?;
   let bytes = js_sys::Uint8Array::new(&buffer);

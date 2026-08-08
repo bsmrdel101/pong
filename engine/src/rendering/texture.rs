@@ -2,6 +2,7 @@ use image::GenericImageView;
 use wgpu::Queue;
 use crate::{error::{EngineError, EngineResult}, platform::load_bytes};
 
+
 pub struct Texture {
   pub texture: wgpu::Texture,
   pub view: wgpu::TextureView,
